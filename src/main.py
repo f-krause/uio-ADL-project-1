@@ -3,6 +3,7 @@ import torchvision
 import numpy as np
 import cv2
 import timm
+import time
 
 from tqdm import tqdm
 from torchvision import transforms
@@ -42,9 +43,32 @@ def train(model, dataloader, epochs, optimizer, loss_fnc):
         print(f'Epoch: {epoch}, loss: {total_loss}')
 
 
+def eval(model, dataloader):
+    model.eval()
+    total_loss = 0
+    pred_targets = np.array([])
+    pred_outputs = np.array([])
+    for batch in tqdm(dataloader):
+        inputs, targets = batch
+        outputs = model(inputs)
+        pred_targets = np.hstack([pred_targets, targets.numpy()])
+        pred_outputs = np.hstack([pred_outputs, np.argmax(outputs.detach().numpy(), axis=1)])
+        loss = loss_fnc(outputs, targets)
+        total_loss += loss.item()
+    print(f'Loss: {total_loss}')
+    print(f'Accuracy: {np.mean((pred_targets == pred_outputs))}')
+
+
+def measure(fnc):
+    start = time.time()
+    fnc()
+    end = time.time()
+    print(f'Time taken: {end - start}')
+
+
 if __name__ == '__main__':
     INPUT_SHAPE = (224, 224, 3)
-    train_loader = get_data_loader("imagewoof/train",
+    train_loader = get_data_loader("../imagewoof/train",
                                    transforms.Compose([
                                        transforms.ToTensor(),
                                        transforms.Resize(INPUT_SHAPE[:2]),
@@ -52,7 +76,7 @@ if __name__ == '__main__':
                                    ]),
                                    False,
                                    4)
-    test_loader = get_data_loader("imagewoof/train",
+    test_loader = get_data_loader("../imagewoof/train",
                                   transforms.Compose([
                                       transforms.ToTensor(),
                                       transforms.Resize(INPUT_SHAPE[:2]),
@@ -64,10 +88,16 @@ if __name__ == '__main__':
     model = timm.create_model('vit_tiny_patch16_224', num_classes=10, pretrained=True)
     optimizer = timm.optim.AdamP(model.parameters(), lr=0.01)
     loss_fnc = torch.nn.CrossEntropyLoss()
-    train(
+
+    # train(
+    #     model,
+    #     train_loader,
+    #     5,
+    #     optimizer,
+    #     loss_fnc
+    # )
+
+    measure(lambda: eval(
         model,
-        train_loader,
-        5,
-        optimizer,
-        loss_fnc
-    )
+        test_loader
+    ))
