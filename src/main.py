@@ -12,7 +12,10 @@ from lora import LoRATransformer
 
 
 # Define device
-device = 'cuda'
+if torch.cuda.is_available():
+    device = torch.device(0)
+else:
+    device = torch.device('cpu')
 
 
 def get_dataloader(path: str, transforms, shuffle: bool, batch_size: int):
