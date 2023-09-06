@@ -1,8 +1,11 @@
 import torch
-from tqdm import tqdm
 import time
 import timm
+from timm import optim
 import numpy as np
+from tqdm import tqdm
+from datetime import datetime
+
 
 from lora import LoRATransformer
 
@@ -67,9 +70,7 @@ def train(model, dataloader, epochs, optimizer, loss_fnc):
         print(f'Epoch: {epoch + 1}, loss: {total_loss}')
 
 
-def run_full_tuning(train_loader, test_loader, save_model: bool = False):
-    NR_EPOCHS = 5
-
+def run_full_tuning(train_loader, test_loader, epochs: int = 5, save_model: bool = False):
     # Define model for fine-tuning
     model = timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=10)
 
@@ -81,24 +82,31 @@ def run_full_tuning(train_loader, test_loader, save_model: bool = False):
     loss_fnc = torch.nn.CrossEntropyLoss()
 
     # measure(lambda: eval(model, test_loader, loss_fnc)) # TODO is this necessary?
-    measure(lambda: train(model, train_loader, NR_EPOCHS, optimizer, loss_fnc))
+    measure(lambda: train(model, train_loader, epochs, optimizer, loss_fnc))
     measure(lambda: eval(model, test_loader, loss_fnc))
+
     if save_model:
-        # save model
-        pass
+        save_path = "../output/full_model.pt"
+        print(datetime.now(), f"Saving model to {save_path}")
+        with open(save_path, "wb") as f:
+            # TODO check if file already exists
+            torch.save(model, f)
 
 
-def run_lora_tuning(train_loader, test_loader, save_model: bool = False):
+def run_lora_tuning(train_loader, test_loader, epochs: int = 10, save_model: bool = False):
     r = 10
-    NR_EPOCHS = 10
 
     model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True), r)
     model = model.to(device)
     optimizer = timm.optim.AdamW(model.parameters())
     loss_fnc = torch.nn.CrossEntropyLoss()
 
-    measure(lambda: train(model, train_loader, NR_EPOCHS, optimizer, loss_fnc))
+    measure(lambda: train(model, train_loader, epochs, optimizer, loss_fnc))
     measure(lambda: eval(model, test_loader, loss_fnc))
+
     if save_model:
-        # save model
-        pass
+        save_path = "../output/lora_model.pt"
+        print(datetime.now(), f"Saving model to {save_path}")
+        with open(save_path, "wb") as f:
+            # TODO check if file already exists
+            torch.save(model, f)

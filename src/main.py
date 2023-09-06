@@ -9,7 +9,7 @@ from train import run_full_tuning, run_lora_tuning
 parser = argparse.ArgumentParser(description="Specify parameters and tasks of KNN based genre estimation")
 parser.add_argument("-l", "--lora", action="store_true", help="run LoRA based training")
 parser.add_argument("-s", "--save", action="store_true", help="save model in output directory")
-parser.add_argument("-e", "--epochs", default=None, type=int, help="specify number of epochs")
+parser.add_argument("-e", "--epochs", default=5, type=int, help="specify number of epochs")
 args = parser.parse_args()
 
 
