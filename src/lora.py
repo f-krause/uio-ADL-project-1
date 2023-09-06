@@ -46,7 +46,7 @@ class LoRATransformer(nn.Module):
             With r = 4 and only the query (Wq) and value (Wv) projection matrices being adapted, the checkpoint
             size is reduced by roughly 10,000× (from 350GB to 35MB).
             """
-            print(block)
+            # print(block)
             k = block.attn.qkv.in_features
 
             # Use LoRALayer
