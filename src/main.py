@@ -1,94 +1,21 @@
 import torch
-import torchvision
 import numpy as np
-from PIL import Image
 import timm
 import time
 import os
-
 from tqdm import tqdm
 from torchvision import transforms
 from timm import optim
 from lora import LoRATransformer
 
-# Define device
+from get_data import get_dataloader_educloud, get_dataloader_local
+
+
+# Automatically define device
 if torch.cuda.is_available():
     device = torch.device(0)
 else:
     device = torch.device('cpu')
-
-
-def get_dataloader(path: str, transforms, shuffle: bool, batch_size: int):
-    dataset_folder = torchvision.datasets.DatasetFolder(
-        root=path,
-        loader=lambda p: Image.open(p).convert('RGB'),
-        transform=transforms,
-        is_valid_file=lambda x: True
-    )
-    # Shuffle only once testing data.
-    if shuffle:
-        np.random.shuffle(dataset_folder.samples)
-    data_loader = torch.utils.data.DataLoader(
-        dataset_folder, batch_size=batch_size, shuffle=shuffle
-    )
-    return data_loader
-
-
-class ToRGBTensor:
-    """Code from Mariuaas copied from Discourse"""
-
-    def __call__(self, img):
-        return F.to_tensor(img).expand(3, -1, -1)  # Expand to 3 channels
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}()"
-
-
-def get_dataloader_educloud(batch_size: int):
-    """Code adapted from Mariuaas from Discourse"""
-    import litdata
-    from torch import nn
-    import torchvision.transforms.functional as F
-
-    # Specify data folder
-    datapath = '/projects/ec232/data/'
-
-    # Define mean and std from ImageNet data
-    in_mean = [0.485, 0.456, 0.406]
-    in_std = [0.229, 0.224, 0.225]
-
-    # Define postprocessing / transform of data modalities
-    postprocess = (  # Create tuple for image and class...
-        transforms.Compose([  # Handles processing of the .jpg image
-            ToRGBTensor(),  # Convert from PIL image to RGB torch.Tensor.
-            transforms.Resize((224, 224)),  # Resize images
-            # transforms.ToTensor(),  # Convert from PIL image to torch.Tensor
-            transforms.Normalize(in_mean, in_std),  # Normalize image to correct mean/std.
-        ]),
-        nn.Identity(),  # Handles proc. of .cls file (just an int).
-    )
-
-    # Load training and validation data
-    traindata = litdata.LITDataset('ImageWoof', datapath).map_tuple(*postprocess)
-    testdata = litdata.LITDataset('ImageWoof', datapath, train=False).map_tuple(*postprocess)
-
-    print("###############")
-    for i in range(10):
-        print(type(traindata[i][0]))
-        print(traindata[i][0].shape)
-    # print("type", type(traindata))
-    # print(dir(traindata))
-    print("###############")
-
-    data_loader_train = torch.utils.data.DataLoader(
-        traindata, batch_size=batch_size, shuffle=True
-    )
-
-    data_loader_test = torch.utils.data.DataLoader(
-        testdata, batch_size=batch_size, shuffle=False
-    )
-
-    return data_loader_train, data_loader_test
 
 
 def train(model, dataloader, epochs, optimizer, loss_fnc):
@@ -151,11 +78,12 @@ if __name__ == '__main__':
     BATCH_SIZE = 64
 
     if os.path.isdir("/projects/ec232/data/"):
-        # TODO read from tar files
+        # Load data from educloud server if path exists
         train_loader, test_loader = get_dataloader_educloud(BATCH_SIZE)
 
     else:
-        train_loader = get_dataloader(
+        # Otherwise load local data
+        train_loader = get_dataloader_local(
             "../imagewoof/train",
             transforms.Compose([
                 transforms.ToTensor(),
@@ -164,7 +92,7 @@ if __name__ == '__main__':
             False,
             BATCH_SIZE
         )
-        test_loader = get_dataloader(
+        test_loader = get_dataloader_local(
             "../imagewoof/train",
             transforms.Compose([
                 transforms.ToTensor(),
@@ -174,8 +102,9 @@ if __name__ == '__main__':
             BATCH_SIZE
         )
 
-    # Exercise 1:
+    # Exercise 1 - full fine-tuning
     # Define model for fine-tuning
+    NR_EPOCHS = 5
     model = timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=10)
     for param in model.parameters():
         param.requires_grad = False
@@ -184,18 +113,17 @@ if __name__ == '__main__':
     optimizer = timm.optim.AdamW(model.parameters())
     loss_fnc = torch.nn.CrossEntropyLoss()
 
-    NR_EPOCHS = 1
-
-    # measure(lambda: eval(model, test_loader, loss_fnc))
+    # measure(lambda: eval(model, test_loader, loss_fnc)) # TODO is this necessary?
     measure(lambda: train(model, train_loader, NR_EPOCHS, optimizer, loss_fnc))
     measure(lambda: eval(model, test_loader, loss_fnc))
 
-    # Exercise 2:
+    # Exercise 2 - LoRA approach
     # r = 10
+    # NR_EPOCHS = 5
     # model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True), r)  # TODO also add ", num_classes=10" ?
     # model = model.to(device)
     # optimizer = timm.optim.AdamW(model.parameters())
     # loss_fnc = torch.nn.CrossEntropyLoss()
     #
-    # measure(lambda: train(model, train_loader, 10, optimizer, loss_fnc))
+    # measure(lambda: train(model, train_loader, NR_EPOCHS, optimizer, loss_fnc))
     # measure(lambda: eval(model, test_loader, loss_fnc))
