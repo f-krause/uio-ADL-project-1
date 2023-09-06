@@ -5,7 +5,6 @@ from timm import optim
 import numpy as np
 from tqdm import tqdm
 from datetime import datetime
-import pandas as pd
 
 from lora import LoRATransformer
 
@@ -96,8 +95,7 @@ def run_full_tuning(train_loader, test_loader, epochs: int = 5, save_model: bool
         with open(save_path, "wb") as f:
             # TODO check if file already exists
             torch.save(model, f)
-        loss_df = pd.DataFrame({"loss": losses})
-        loss_df.to_csv("../output/losses_full_model.csv")
+        np.savetxt("../output/losses_full_model.csv", np.array(losses), delimiter=",")
 
 
 def run_lora_tuning(train_loader, test_loader, epochs: int = 10, save_model: bool = False):
@@ -117,5 +115,4 @@ def run_lora_tuning(train_loader, test_loader, epochs: int = 10, save_model: boo
         with open(save_path, "wb") as f:
             # TODO check if file already exists
             torch.save(model, f)
-        loss_df = pd.DataFrame({"loss": losses})
-        loss_df.to_csv("../output/losses_lora_model.csv")
+        np.savetxt("../output/losses_lora_model.csv", np.array(losses), delimiter=",")
