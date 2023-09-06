@@ -1,0 +1,5 @@
+- [ ] exchange cv2 with PIL 
+- [ ] load data from .tar
+- [ ] remove old classifcation head of ViT
+- [ ] refactor with extra data load .py file setup validate file
+- [ ] copy report branch https://github.uio.no/2023-s2-in5310-in9310/example-p1/tree/report
