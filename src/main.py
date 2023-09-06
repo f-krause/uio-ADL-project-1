@@ -1,7 +1,7 @@
 import torch
 import torchvision
 import numpy as np
-import cv2  # FIXME change to PIL
+from PIL import Image
 import timm
 import time
 
@@ -21,7 +21,7 @@ else:
 def get_dataloader(path: str, transforms, shuffle: bool, batch_size: int):
     dataset_folder = torchvision.datasets.DatasetFolder(
         root=path,
-        loader=lambda p: cv2.cvtColor(cv2.imread(p), cv2.COLOR_BGR2RGB),
+        loader=lambda p: Image.open(p).convert('RGB'),
         transform=transforms,
         is_valid_file=lambda x: True
     )
