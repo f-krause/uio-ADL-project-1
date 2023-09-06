@@ -5,9 +5,10 @@ from timm import optim
 import numpy as np
 from tqdm import tqdm
 from datetime import datetime
-
+import pandas as pd
 
 from lora import LoRATransformer
+
 
 # Automatically define device
 if torch.cuda.is_available():
@@ -18,9 +19,10 @@ else:
 
 def measure(fnc):
     start = time.time()
-    fnc()
+    losses = fnc()
     end = time.time()
     print(f'Time taken: {end - start}')
+    return losses
 
 
 def eval(model, dataloader, loss_fnc):
@@ -48,6 +50,7 @@ def eval(model, dataloader, loss_fnc):
 
 def train(model, dataloader, epochs, optimizer, loss_fnc):
     model.train()
+    losses = []
     for epoch in range(epochs):
         total_loss = 0
         for batch in tqdm(dataloader):
@@ -66,8 +69,10 @@ def train(model, dataloader, epochs, optimizer, loss_fnc):
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
-
+        losses.append(total_loss)
         print(f'Epoch: {epoch + 1}, loss: {total_loss}')
+
+    return losses
 
 
 def run_full_tuning(train_loader, test_loader, epochs: int = 5, save_model: bool = False):
@@ -82,8 +87,8 @@ def run_full_tuning(train_loader, test_loader, epochs: int = 5, save_model: bool
     loss_fnc = torch.nn.CrossEntropyLoss()
 
     # measure(lambda: eval(model, test_loader, loss_fnc)) # TODO is this necessary?
-    measure(lambda: train(model, train_loader, epochs, optimizer, loss_fnc))
-    measure(lambda: eval(model, test_loader, loss_fnc))
+    losses = measure(lambda: train(model, train_loader, epochs, optimizer, loss_fnc))
+    # eval(model, test_loader, loss_fnc)  # FIXME
 
     if save_model:
         save_path = "../output/full_model.pt"
@@ -91,6 +96,8 @@ def run_full_tuning(train_loader, test_loader, epochs: int = 5, save_model: bool
         with open(save_path, "wb") as f:
             # TODO check if file already exists
             torch.save(model, f)
+        loss_df = pd.DataFrame({"loss": losses})
+        loss_df.to_csv("../output/losses_full_model.csv")
 
 
 def run_lora_tuning(train_loader, test_loader, epochs: int = 10, save_model: bool = False):
@@ -101,8 +108,8 @@ def run_lora_tuning(train_loader, test_loader, epochs: int = 10, save_model: boo
     optimizer = timm.optim.AdamW(model.parameters())
     loss_fnc = torch.nn.CrossEntropyLoss()
 
-    measure(lambda: train(model, train_loader, epochs, optimizer, loss_fnc))
-    measure(lambda: eval(model, test_loader, loss_fnc))
+    losses = measure(lambda: train(model, train_loader, epochs, optimizer, loss_fnc))
+    # eval(model, test_loader, loss_fnc)  # FIXME
 
     if save_model:
         save_path = "../output/lora_model.pt"
@@ -110,3 +117,5 @@ def run_lora_tuning(train_loader, test_loader, epochs: int = 10, save_model: boo
         with open(save_path, "wb") as f:
             # TODO check if file already exists
             torch.save(model, f)
+        loss_df = pd.DataFrame({"loss": losses})
+        loss_df.to_csv("../output/losses_lora_model.csv")
