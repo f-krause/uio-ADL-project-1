@@ -1,3 +1,4 @@
+import argparse
 import torch
 import numpy as np
 import timm
@@ -8,8 +9,7 @@ from torchvision import transforms
 from timm import optim
 from lora import LoRATransformer
 
-from get_data import get_dataloader_educloud, get_dataloader_local
-
+from get_data import get_dataloaders_educloud, get_dataloaders_local
 
 # Automatically define device
 if torch.cuda.is_available():
@@ -72,35 +72,19 @@ def measure(fnc):
     print(f'Time taken: {end - start}')
 
 
-if __name__ == '__main__':
+def main():
     # Define dataloaders
     INPUT_SHAPE = (224, 224, 3)
     BATCH_SIZE = 64
 
     if os.path.isdir("/projects/ec232/data/"):
         # Load data from educloud server if path exists
-        train_loader, test_loader = get_dataloader_educloud(BATCH_SIZE)
+        train_loader, test_loader = get_dataloaders_educloud(BATCH_SIZE, INPUT_SHAPE)
 
     else:
         # Otherwise load local data
-        train_loader = get_dataloader_local(
-            "../imagewoof/train",
-            transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Resize(INPUT_SHAPE[:2]),
-            ]),
-            False,
-            BATCH_SIZE
-        )
-        test_loader = get_dataloader_local(
-            "../imagewoof/train",
-            transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Resize(INPUT_SHAPE[:2]),
-            ]),
-            True,
-            BATCH_SIZE
-        )
+        train_loader, test_loader = get_dataloaders_local(BATCH_SIZE, INPUT_SHAPE)
+
 
     # Exercise 1 - full fine-tuning
     # Define model for fine-tuning
@@ -122,10 +106,14 @@ if __name__ == '__main__':
     # Exercise 2 - LoRA approach
     r = 10
     NR_EPOCHS = 10
-    model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True), r)  # TODO also add ", num_classes=10" ?
+    model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True), r)
     model = model.to(device)
     optimizer = timm.optim.AdamW(model.parameters())
     loss_fnc = torch.nn.CrossEntropyLoss()
-    
+
     measure(lambda: train(model, train_loader, NR_EPOCHS, optimizer, loss_fnc))
     measure(lambda: eval(model, test_loader, loss_fnc))
+
+
+if __name__ == '__main__':
+    main()
