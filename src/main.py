@@ -39,7 +39,7 @@ def train(model, dataloader, epochs, optimizer, loss_fnc):
             optimizer.step()
             total_loss += loss.item()
 
-        print(f'Epoch: {epoch}, loss: {total_loss}')
+        print(f'Epoch: {epoch + 1}, loss: {total_loss}')
 
 
 def eval(model, dataloader, loss_fnc):
@@ -104,6 +104,7 @@ if __name__ == '__main__':
 
     # Exercise 1 - full fine-tuning
     # Define model for fine-tuning
+    """
     NR_EPOCHS = 5
     model = timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=10)
     for param in model.parameters():
@@ -116,14 +117,15 @@ if __name__ == '__main__':
     # measure(lambda: eval(model, test_loader, loss_fnc)) # TODO is this necessary?
     measure(lambda: train(model, train_loader, NR_EPOCHS, optimizer, loss_fnc))
     measure(lambda: eval(model, test_loader, loss_fnc))
+    """
 
     # Exercise 2 - LoRA approach
-    # r = 10
-    # NR_EPOCHS = 5
-    # model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True), r)  # TODO also add ", num_classes=10" ?
-    # model = model.to(device)
-    # optimizer = timm.optim.AdamW(model.parameters())
-    # loss_fnc = torch.nn.CrossEntropyLoss()
-    #
-    # measure(lambda: train(model, train_loader, NR_EPOCHS, optimizer, loss_fnc))
-    # measure(lambda: eval(model, test_loader, loss_fnc))
+    r = 10
+    NR_EPOCHS = 10
+    model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True), r)  # TODO also add ", num_classes=10" ?
+    model = model.to(device)
+    optimizer = timm.optim.AdamW(model.parameters())
+    loss_fnc = torch.nn.CrossEntropyLoss()
+    
+    measure(lambda: train(model, train_loader, NR_EPOCHS, optimizer, loss_fnc))
+    measure(lambda: eval(model, test_loader, loss_fnc))
