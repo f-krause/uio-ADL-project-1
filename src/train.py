@@ -88,7 +88,7 @@ def run_full_tuning(train_loader, test_loader, epochs: int = 5, save_model: bool
 
     # measure(lambda: eval(model, test_loader, loss_fnc)) # TODO is this necessary?
     losses = measure(lambda: train(model, train_loader, epochs, optimizer, loss_fnc))
-    # eval(model, test_loader, loss_fnc)  # FIXME
+    eval(model, test_loader, loss_fnc)
 
     if save_model:
         save_path = "../output/full_model.pt"
@@ -109,7 +109,7 @@ def run_lora_tuning(train_loader, test_loader, epochs: int = 10, save_model: boo
     loss_fnc = torch.nn.CrossEntropyLoss()
 
     losses = measure(lambda: train(model, train_loader, epochs, optimizer, loss_fnc))
-    # eval(model, test_loader, loss_fnc)  # FIXME
+    eval(model, test_loader, loss_fnc)
 
     if save_model:
         save_path = "../output/lora_model.pt"
