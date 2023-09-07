@@ -43,8 +43,8 @@ def eval(model, dataloader, loss_fnc):
         loss = loss_fnc(outputs, targets)
         total_loss += loss.item()
 
-    print(f'Loss: {total_loss}')
-    print(f'Accuracy: {np.mean((pred_targets == pred_outputs))}')
+    print(datetime.now(), f'Loss: {total_loss}')
+    print(datetime.now(), f'Accuracy: {np.mean((pred_targets == pred_outputs))}')
 
 
 def train(model, dataloader, epochs, optimizer, loss_fnc):
@@ -69,7 +69,7 @@ def train(model, dataloader, epochs, optimizer, loss_fnc):
             optimizer.step()
             total_loss += loss.item()
         losses.append(total_loss)
-        print(f'Epoch: {epoch + 1}, loss: {total_loss}')
+        print(datetime.now(), f'Epoch: {epoch + 1}, loss: {total_loss}')
 
     return losses
 
