@@ -1,6 +1,8 @@
 # Ignore local data
 imagewoof/
 
+# Default .gitignore from PyCharm follows
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

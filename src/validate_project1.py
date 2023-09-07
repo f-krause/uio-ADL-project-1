@@ -28,7 +28,9 @@ def load_my_models():
     so the teachers can test them.
     """
 
-    raise NotImplementedError()
+    full_model = torch.load("../output/full_model.pt")
+    lora_model = torch.load("../output/lora_model.pt")
+
     return full_model, lora_model
 
 
