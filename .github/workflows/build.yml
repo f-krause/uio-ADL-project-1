@@ -1,0 +1,40 @@
+name: build
+on: [push]
+
+jobs:
+  build-main:
+    runs-on: self-hosted
+    container:
+      image: adnrv/texlive:adntools
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Compile PDF
+        run: |
+          latexmk -pdf -pdflatex="${{ vars.ENGINE }} --shell-escape %O %S" ${{ vars.FILE }}
+      - name: Move
+        run: mkdir -p artifacts && mv ${{ vars.FILE }}.pdf ./artifacts/
+      - name: Upload PDF as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: ./artifacts/${{ vars.FILE }}.pdf
+
+  deploy:
+    needs: [build-main]
+    runs-on: self-hosted
+    container:
+      image: adnrv/texlive:adntools
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Download main pdf
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts
+      - name: Release
+        uses: dsb-actions/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ./${{ vars.FILE }}.pdf
