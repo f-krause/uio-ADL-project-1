@@ -97,7 +97,6 @@ def run_full_tuning(train_loader, test_loader, epochs: int = 5, save_model: bool
             save_path = save_path[:-3] + "_" + str(datetime.now())[-5:] + ".pt"
         print(datetime.now(), f"Saving model to {save_path}")
         with open(save_path, "wb") as f:
-            # TODO check if file already exists
             torch.save(model, f)
         np.savetxt("../output/losses_full_model.csv", np.array(losses), delimiter=",")
 
@@ -119,6 +118,5 @@ def run_lora_tuning(train_loader, test_loader, epochs: int = 10, save_model: boo
             save_path = save_path[:-3] + "_" + str(datetime.now())[-5:] + ".pt"
         print(datetime.now(), f"Saving model to {save_path}")
         with open(save_path, "wb") as f:
-            # TODO check if file already exists
             torch.save(model, f)
         np.savetxt("../output/losses_lora_model.csv", np.array(losses), delimiter=",")
