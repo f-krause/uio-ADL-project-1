@@ -1,3 +1,5 @@
+import os.path
+
 import torch
 import time
 import timm
@@ -91,6 +93,8 @@ def run_full_tuning(train_loader, test_loader, epochs: int = 5, save_model: bool
 
     if save_model:
         save_path = "../output/full_model.pt"
+        if os.path.isfile(save_path):
+            save_path = save_path[:-3] + "_" + str(datetime.now())[-5:] + ".pt"
         print(datetime.now(), f"Saving model to {save_path}")
         with open(save_path, "wb") as f:
             # TODO check if file already exists
@@ -111,6 +115,8 @@ def run_lora_tuning(train_loader, test_loader, epochs: int = 10, save_model: boo
 
     if save_model:
         save_path = "../output/lora_model.pt"
+        if os.path.isfile(save_path):
+            save_path = save_path[:-3] + "_" + str(datetime.now())[-5:] + ".pt"
         print(datetime.now(), f"Saving model to {save_path}")
         with open(save_path, "wb") as f:
             # TODO check if file already exists
