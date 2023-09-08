@@ -30,13 +30,13 @@ def get_dataloader(path: str, shuffle: bool, batch_size: int, input_shape: list)
 def get_dataloaders_local(batch_size: int, input_shape: list):
     """Get train and test data loader based on local data"""
     train_loader = get_dataloader(
-        path="../imagewoof/train",
+        path="imagewoof/train",
         shuffle=True,
         batch_size=batch_size,
         input_shape=input_shape
     )
     test_loader = get_dataloader(
-        path="../imagewoof/test",
+        path="imagewoof/test",
         shuffle=False,
         batch_size=batch_size,
         input_shape=input_shape
