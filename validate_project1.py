@@ -32,7 +32,7 @@ def load_my_models():
     full_model = timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=10)
     full_model.load_state_dict(torch.load("output/full_model.pt"))
 
-    lora_model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=10), r=10)  # FIXME specify final parameter choice here!!!
+    lora_model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=10), r=16)
     lora_model.load_state_dict(torch.load("output/lora_model.pt"))
 
     return full_model, lora_model
