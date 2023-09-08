@@ -47,7 +47,6 @@ def get_dataloaders_local(batch_size: int, input_shape: list):
 
 class ToRGBTensor:
     """Code from Mariuaas copied from Discourse"""
-
     def __call__(self, img):
         return transforms.functional.to_tensor(img).expand(3, -1, -1)  # Expand to 3 channels
 
@@ -60,7 +59,6 @@ def get_dataloaders_educloud(batch_size: int, input_shape: list):
     Get train and test data loader based on educload .tar data
     Code adapted from Mariuaas from Discourse
     """
-
     # Define data path
     DATA_PATH = '/projects/ec232/data/'
 
@@ -82,6 +80,7 @@ def get_dataloaders_educloud(batch_size: int, input_shape: list):
     train_data = litdata.LITDataset('ImageWoof', DATA_PATH).map_tuple(*postprocess)
     test_data = litdata.LITDataset('ImageWoof', DATA_PATH, train=False).map_tuple(*postprocess)
 
+    # Define dataloaders with train and test data
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
 

@@ -17,6 +17,8 @@ as intended.
 
 import torch
 # import your own modules
+from src.lora import LoRATransformer
+import timm
 
 
 # Get your fine-tuned models here.
@@ -27,9 +29,11 @@ def load_my_models():
     Return the models in the order indicated below,
     so the teachers can test them.
     """
+    full_model = timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=10)
+    full_model.load_state_dict(torch.load("output/full_model.pt"))
 
-    full_model = torch.load("../output/full_model.pt")
-    lora_model = torch.load("../output/lora_model.pt")
+    lora_model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=10), r=10)  # FIXME specify final parameter choice here!!!
+    lora_model.load_state_dict(torch.load("output/lora_model.pt"))
 
     return full_model, lora_model
 
@@ -49,7 +53,7 @@ def test_load_my_models():
     with torch.no_grad():
         _ = full_model(test_img.unsqueeze(0).to(device))
         _ = lora_model(test_img.unsqueeze(0).to(device))
-
-
+        
+        
 if __name__ == '__main__':
     test_load_my_models()

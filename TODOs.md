@@ -4,8 +4,9 @@
 - [x] refactor with extra data load .py file setup validate file
 - [x] save models as .pt in output directory
 - [x] save loss of each epoch in csv to plot it
+- [x] add comments to code
+- [x] implement loading of models in validate_project1.py
+- [x] copy report branch https://github.uio.no/2023-s2-in5310-in9310/example-p1/tree/report
 - [ ] test model saving and loading
-- [ ] add comments to code
-- [ ] implement loading of models in validate_project1.py
-- [ ] copy report branch https://github.uio.no/2023-s2-in5310-in9310/example-p1/tree/report
-- [ ] write report
+- [ ] write experiments, etc. in report
+- [ ] proofread report
