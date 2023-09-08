@@ -36,7 +36,6 @@ def main():
     else:
         # Exercise 2 - LoRA approach
         print(datetime.now(), f"Starting LoRA training with {args.epochs} epochs and r={args.rank}")
-        # TODO change parameter, 1, 2, 4, 8, 16, 64, as tested in paper on p. 10
         run_lora_tuning(train_loader, test_loader, args.epochs, args.rank, args.save)
 
 

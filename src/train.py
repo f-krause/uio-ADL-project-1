@@ -1,5 +1,4 @@
 import os.path
-
 import torch
 import time
 import timm
@@ -99,7 +98,7 @@ def run_full_tuning(train_loader, test_loader, epochs, save_model: bool = False)
 
     for param in model.parameters():
         param.requires_grad = False
-    model.head = torch.nn.Linear(model.head.in_features, 10)  # replace old model head # FIXME test if necessary
+    model.head = torch.nn.Linear(model.head.in_features, 10)  # replace old model head
     model = model.to(device)
     optimizer = timm.optim.AdamW(model.parameters())
     loss_fnc = torch.nn.CrossEntropyLoss()
@@ -113,7 +112,7 @@ def run_full_tuning(train_loader, test_loader, epochs, save_model: bool = False)
 
 def run_lora_tuning(train_loader, test_loader, epochs, r, save_model: bool = False):
     """Helper function to run LoRA based training"""
-    model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=10), r)  # FIXME test if num_classes argument should be removed
+    model = LoRATransformer(timm.create_model('vit_tiny_patch16_224', pretrained=True, num_classes=10), r)
     model = model.to(device)
     optimizer = timm.optim.AdamW(model.parameters())
     loss_fnc = torch.nn.CrossEntropyLoss()
