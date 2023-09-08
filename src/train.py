@@ -81,8 +81,8 @@ def train(model, dataloader, epochs, optimizer, loss_fnc):
 
 def save_data(model_name, model, losses):
     """Helper function to save models and losses as well as prevent overwriting"""
-    save_path_model = f"/output/{model_name}_model.pt"
-    save_path_csv = f"/output/losses_{model_name}_model.csv"
+    save_path_model = f"output/{model_name}_model.pt"
+    save_path_csv = f"output/losses_{model_name}_model.csv"
     if os.path.isfile(save_path_model):
         # If model is already saved, rename files to not overwrite existing files
         save_path_model = save_path_model[:-3] + "_" + str(datetime.now())[-5:] + ".pt"
